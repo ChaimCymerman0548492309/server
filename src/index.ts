@@ -1,14 +1,8 @@
-﻿console.log('Node עובד!');
+﻿import express from 'express';
 
-console.log('Hello, World!');
+const app = express();
+const port = 3000;
 
-
-    const userName = 'Alice';
-
-
-//     git init
-// git add .
-// git commit -m "first commit"
-// git branch -M main
-// git remote add origin https://github.com/ChaimCymerman0548492309/test-repo.git
-// git push -u origin main
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
+});
