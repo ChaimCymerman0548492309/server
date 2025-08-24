@@ -1,68 +1,72 @@
 
-
-## **README.md לדוגמה**
-
 ````markdown
 # Resource Allocator (Parking-Lot Preset)
 
-### מבנה ומימוש
-- יצרנו **Allocator class** שמנהל משאבים (Vehicles) על פני קומות (Floors) עם יחידות (Spots).  
-- סוגי רכבים: MOTORCYCLE, CAR, VAN.  
-- סוגי חניות: MOTORCYCLE, COMPACT, LARGE.  
-- חוקי התאמה (fit rules):
-  - MOTORCYCLE → מתאים לכל יחידה  
-  - CAR → COMPACT / LARGE  
-  - VAN → LARGE בלבד  
-- מדיניות הקצאה: **first-fit** – הקומה הראשונה עם מקום פנוי.
+### Design & Implementation
+- Implemented an **Allocator class** that manages resources (Vehicles) across Floors with Spots.  
+- Vehicle types: `MOTORCYCLE`, `CAR`, `VAN`.  
+- Spot types: `MOTORCYCLE`, `COMPACT`, `LARGE`.  
+- Fit rules:
+  - `MOTORCYCLE` → fits in any spot  
+  - `CAR` → fits in `COMPACT` or `LARGE`  
+  - `VAN` → fits in `LARGE` only  
+- Allocation policy: **first-fit** – assigns the first floor that has compatible capacity.
 
 ### API (Express)
-- `POST /allocate` → JSON body `{id, kind}` → מחזיר location או `no_capacity`  
-- `POST /release` → JSON body `{id}` → מחזיר `ok` או `not_found`  
-- `GET /stats` → counters: totalBySize, freeBySize, usedByKind  
-- `GET /isFull` / `GET /isEmpty` → boolean
+- `POST /allocate` → JSON body `{id, kind}` → returns a `location` or `no_capacity`  
+- `POST /release` → JSON body `{id}` → returns `ok` or `not_found`  
+- `GET /stats` → returns counters: `totalBySize`, `freeBySize`, `usedByKind`  
+- `GET /isFull` / `GET /isEmpty` → returns a boolean
 
-### איך להריץ
-1. התקן dependencies:
+### How to Run
+1. Install dependencies:
 ```bash
 npm install
 ````
 
-2. בנה את TypeScript:
+2. Build the TypeScript project:
 
 ```bash
 npm run build
 ```
 
-3. הפעל את השרת:
+3. Start the server:
 
 ```bash
 npm start
 ```
 
-4. בצע בדיקות עם curl או Postman (דוגמאות למטה).
+4. Test with `curl` or Postman (examples below).
 
-### דוגמאות בדיקות curl
+### Example curl Tests
 
 ```bash
-# Allocate Car
-curl -X POST http://localhost:3000/allocate -H "Content-Type: application/json" -d '{"id":"car1","kind":"CAR"}'
+# Allocate a Car
+curl -X POST http://localhost:3000/allocate \
+  -H "Content-Type: application/json" \
+  -d '{"id":"car1","kind":"CAR"}'
 
-# Release Car
-curl -X POST http://localhost:3000/release -H "Content-Type: application/json" -d '{"id":"car1"}'
+# Release a Car
+curl -X POST http://localhost:3000/release \
+  -H "Content-Type: application/json" \
+  -d '{"id":"car1"}'
 
-# Stats
+# Get Stats
 curl http://localhost:3000/stats
 
 # Check if Full
 curl http://localhost:3000/isFull
 ```
 
-### Design choices
+### Design Choices
 
-* Encapsulation: floors ו-spots לא נחשפים החוצה.
-* TypeScript strict mode + union types + interfaces.
-* Allocation deterministic (first-fit).
-* Resource registry map לשמירת resourceId → kind.
+* Encapsulation: floors and spots are not exposed externally.
+* TypeScript strict mode, union types, and interfaces ensure type safety.
+* Deterministic allocation (first-fit policy).
+* Resource registry map tracks `resourceId → kind`.
 
 ```
+
+---
+
 
