@@ -1,44 +1,77 @@
 
+
 ````markdown
-# Resource Allocator (Parking-Lot Preset)
+# 🚗 Resource Allocator (Parking-Lot Preset)
 
-### Design & Implementation
-- Implemented an **Allocator class** that manages resources (Vehicles) across Floors with Spots.  
-- Vehicle types: `MOTORCYCLE`, `CAR`, `VAN`.  
-- Spot types: `MOTORCYCLE`, `COMPACT`, `LARGE`.  
-- Fit rules:
-  - `MOTORCYCLE` → fits in any spot  
-  - `CAR` → fits in `COMPACT` or `LARGE`  
-  - `VAN` → fits in `LARGE` only  
-- Allocation policy: **first-fit** – assigns the first floor that has compatible capacity.
+A small system for allocating parking spots to vehicles using **first-fit** policy.  
+Built with **TypeScript + Express**.
 
-### API (Express)
-- `POST /allocate` → JSON body `{id, kind}` → returns a `location` or `no_capacity`  
-- `POST /release` → JSON body `{id}` → returns `ok` or `not_found`  
-- `GET /stats` → returns counters: `totalBySize`, `freeBySize`, `usedByKind`  
-- `GET /isFull` / `GET /isEmpty` → returns a boolean
+---
 
-### How to Run
-1. Install dependencies:
-```bash
-npm install
+## 📐 Design & Implementation
+- **Allocator class** manages resources (vehicles) across **Floors → Spots**.  
+- Encapsulation: Floors/Spots are private (not exposed externally).  
+- Deterministic allocation → *first compatible floor wins*.  
+- Strict typing: TypeScript `union types + interfaces`.
+
+### Vehicle & Spot Types
+| Vehicle      | Allowed Spots        |
+|--------------|----------------------|
+| 🏍️ Motorcycle | Motorcycle / Compact / Large |
+| 🚗 Car        | Compact / Large      |
+| 🚐 Van        | Large only           |
+
+---
+
+## 🌐 API Endpoints
+
+| Method | Endpoint      | Body Example                   | Response                |
+|--------|--------------|--------------------------------|-------------------------|
+| POST   | `/allocate`  | `{ "id": "car1", "kind": "CAR" }` | `location` / `no_capacity` |
+| POST   | `/release`   | `{ "id": "car1" }`             | `ok` / `not_found`      |
+| GET    | `/stats`     | –                              | `{ totalBySize, freeBySize, usedByKind }` |
+| GET    | `/isFull`    | –                              | `true` / `false`        |
+| GET    | `/isEmpty`   | –                              | `true` / `false`        |
+
+---
+
+## 📂 Project Structure
+```text
+.
+├── src
+│   ├── allocator.ts     # Core Allocator logic
+│   ├── types.ts         # Enums & interfaces
+│   ├── server.ts        # Express server + routes
+│   └── index.ts         # Entry point
+├── package.json
+├── tsconfig.json
+└── README.md
 ````
 
-2. Build the TypeScript project:
+---
 
-```bash
-npm run build
-```
+## ▶️ How to Run
 
-3. Start the server:
+1. Install dependencies:
 
-```bash
-npm start
-```
+   ```bash
+   npm install
+   ```
+2. Build:
 
-4. Test with `curl` or Postman (examples below).
+   ```bash
+   npm run build
+   ```
+3. Start:
 
-### Example curl Tests
+   ```bash
+   npm start
+   ```
+4. Test with curl / Postman (examples below).
+
+---
+
+## 🧪 Example curl Tests
 
 ```bash
 # Allocate a Car
@@ -58,15 +91,13 @@ curl http://localhost:3000/stats
 curl http://localhost:3000/isFull
 ```
 
-### Design Choices
-
-* Encapsulation: floors and spots are not exposed externally.
-* TypeScript strict mode, union types, and interfaces ensure type safety.
-* Deterministic allocation (first-fit policy).
-* Resource registry map tracks `resourceId → kind`.
-
-```
-
 ---
+
+## 🎯 Design Highlights
+
+* **Encapsulation** → Floors/Spots hidden internally.
+* **Type-safety** → strict TypeScript + union types.
+* **Deterministic allocation** → first-fit policy.
+* **Resource registry** → keeps `resourceId → kind`.
 
 
