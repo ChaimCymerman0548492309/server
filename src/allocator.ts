@@ -1,68 +1,70 @@
 import { VehicleKind, SpotSize, Resource, Floor, Spot, AllocationResult, Stats } from "./types/types";
 
 function fits(resourceKind: VehicleKind, spotSize: SpotSize): boolean {
-  switch (resourceKind) {
-    case "MOTORCYCLE":
-      return true;
-    case "CAR":
-      return spotSize === "COMPACT" || spotSize === "LARGE";
-    case "VAN":
-      return spotSize === "LARGE";
-    default:
-      return false;
-  }
+  const fitMatrix: Record<VehicleKind, SpotSize[]> = {
+    "MOTORCYCLE": ["MOTORCYCLE", "COMPACT", "LARGE"],
+    "CAR": ["COMPACT", "LARGE"],
+    "VAN": ["LARGE"]
+  };
+  
+  return fitMatrix[resourceKind].includes(spotSize);
 }
 
 export class Allocator {
   private floors: Floor[];
+  private resourceKindMap: Record<string, VehicleKind> = {};
 
   constructor(floors: Floor[]) {
     this.floors = floors;
   }
 
   allocate(resource: Resource): AllocationResult | null {
+    this.resourceKindMap[resource.id] = resource.kind;
+    
     for (const floor of this.floors) {
-      for (const spot of floor.spots) {
-        if (!spot.occupiedBy && fits(resource.kind, spot.size)) {
-          spot.occupiedBy = resource.id;
-          return { container: floor.id, unitId: spot.id };
-        }
+      const availableSpot = floor.spots.find(spot => 
+        !spot.occupiedBy && fits(resource.kind, spot.size)
+      );
+      
+      if (availableSpot) {
+        availableSpot.occupiedBy = resource.id;
+        return { container: floor.id, unitId: availableSpot.id };
       }
     }
+    
     return null;
   }
 
   release(resourceId: string): boolean {
+    delete this.resourceKindMap[resourceId];
+    
     for (const floor of this.floors) {
-      for (const spot of floor.spots) {
-        if (spot.occupiedBy === resourceId) {
-          spot.occupiedBy = undefined;
-          return true;
-        }
-      }
+      const spot = floor.spots.find(spot => spot.occupiedBy === resourceId);
+      if (spot) return !!(spot.occupiedBy = undefined);
     }
     return false;
   }
 
   stats(): Stats {
-    const totalBySize: Record<SpotSize, number> = { MOTORCYCLE: 0, COMPACT: 0, LARGE: 0 };
-    const freeBySize: Record<SpotSize, number> = { MOTORCYCLE: 0, COMPACT: 0, LARGE: 0 };
-    const usedByKind: Record<VehicleKind, number> = { MOTORCYCLE: 0, CAR: 0, VAN: 0 };
+  const totalBySize: Record<SpotSize, number> = { MOTORCYCLE: 0, COMPACT: 0, LARGE: 0 };
+  const freeBySize: Record<SpotSize, number> = { MOTORCYCLE: 0, COMPACT: 0, LARGE: 0 };
+  const usedByKind: Record<VehicleKind, number> = { MOTORCYCLE: 0, CAR: 0, VAN: 0 };
 
-    for (const floor of this.floors) {
-      for (const spot of floor.spots) {
-        totalBySize[spot.size]++;
-        if (!spot.occupiedBy) {
-          freeBySize[spot.size]++;
-        } else {
-          usedByKind[getResourceKindById(spot.occupiedBy)]++;
-        }
+  this.floors.forEach(floor => {
+    floor.spots.forEach(spot => {
+      totalBySize[spot.size]++;
+      
+      if (spot.occupiedBy) {
+        const kind = this.resourceKindMap[spot.occupiedBy];
+        if (kind) usedByKind[kind]++;
+      } else {
+        freeBySize[spot.size]++;
       }
-    }
+    });
+  });
 
-    return { totalBySize, freeBySize, usedByKind };
-  }
-
+  return { totalBySize, freeBySize, usedByKind };
+}
   isFull(): boolean {
     return this.floors.every(floor => floor.spots.every(spot => spot.occupiedBy !== undefined));
   }
@@ -70,16 +72,10 @@ export class Allocator {
   isEmpty(): boolean {
     return this.floors.every(floor => floor.spots.every(spot => spot.occupiedBy === undefined));
   }
-}
 
-const resourceKindMap: Record<string, VehicleKind> = {};
-
-export function registerResource(resource: Resource) {
-  resourceKindMap[resource.id] = resource.kind;
-}
-
-function getResourceKindById(resourceId: string): VehicleKind {
-  const kind = resourceKindMap[resourceId];
-  if (!kind) throw new Error(`Unknown resourceId: ${resourceId}`);
-  return kind;
+  private getResourceKindById(resourceId: string): VehicleKind {
+    const kind = this.resourceKindMap[resourceId];
+    if (!kind) throw new Error(`Unknown resourceId: ${resourceId}`);
+    return kind;
+  }
 }

@@ -1,6 +1,6 @@
 ﻿// src/server.ts
 import express from "express";
-import { Allocator, registerResource } from "./allocator";
+import { Allocator,  } from "./allocator";
 import { VehicleKind, Resource, Floor } from "./types/types";
 
 const app = express();
@@ -33,7 +33,7 @@ app.post("/allocate", (req, res) => {
   if (!id || !kind) return res.status(400).json({ error: "Missing id or kind" });
 
   const resource: Resource = { id, kind };
-  registerResource(resource);
+  // registerResource(resource);
 
   const result = allocator.allocate(resource);
   if (result) res.json({ status: "ok", location: result });
