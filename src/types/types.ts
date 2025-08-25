@@ -27,3 +27,5 @@ export interface Stats {
   freeBySize: Record<SpotSize, number>;
   usedByKind: Record<VehicleKind, number>;
 }
+
+

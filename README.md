@@ -1,6 +1,3 @@
-
-
-````markdown
 # 🚗 Resource Allocator (Parking-Lot Preset)
 
 A small system for allocating parking spots to vehicles using **first-fit** policy.  
@@ -20,6 +17,12 @@ Built with **TypeScript + Express**.
 | 🏍️ Motorcycle | Motorcycle / Compact / Large |
 | 🚗 Car        | Compact / Large      |
 | 🚐 Van        | Large only           |
+
+---
+
+## 🖼️ System Diagram
+
+![System Diagram](Untitled_diagram.png)
 
 ---
 
@@ -46,7 +49,7 @@ Built with **TypeScript + Express**.
 ├── package.json
 ├── tsconfig.json
 └── README.md
-````
+```
 
 ---
 
@@ -99,5 +102,3 @@ curl http://localhost:3000/isFull
 * **Type-safety** → strict TypeScript + union types.
 * **Deterministic allocation** → first-fit policy.
 * **Resource registry** → keeps `resourceId → kind`.
-
-
