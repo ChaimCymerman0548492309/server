@@ -2,6 +2,7 @@
 import express from "express";
 import { Allocator,  } from "./allocator";
 import { VehicleKind, Resource, Floor } from "./types/types";
+import router from "./router";
 
 const app = express();
 const port = 3000;
@@ -55,6 +56,8 @@ app.get("/stats", (req, res) => {
 
 app.get("/isFull", (req, res) => res.json({ isFull: allocator.isFull() }));
 app.get("/isEmpty", (req, res) => res.json({ isEmpty: allocator.isEmpty() }));
+
+app.use("/items", router);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
