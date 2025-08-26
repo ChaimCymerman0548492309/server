@@ -1,39 +1,35 @@
-import { VehicleKind, SpotSize, Resource, Floor, AllocationResult, Stats } from "./types/types";
+import { VehicleKind, SpotSize,  Car, Floor, AllocationResult, Stats } from "./types/types";
 
 export class Allocator {
-  private floors: Floor[];
-  private resourceKindMap: Record<string, VehicleKind> = {};
+  private floors :Floor[];
+  private resourceKindMap  : Record<string , VehicleKind> = {};
 
-  constructor(floors: Floor[]) {
+  constructor(floors : Floor[]) {
     this.floors = floors;
+}
+allocate(car : Car) :AllocationResult | null {
+this.resourceKindMap[car.CarId] = car.kind;
+for (const floor of this.floors) {
+  const spot = floor.spots.find(s => !s.occupiedBy && s.size >= car.kind)
+  if (spot) {
+    spot.occupiedBy = car.CarId;
+    return { spotId: spot.id };
   }
+} return null;
+}
 
-  allocate(resource: Resource): AllocationResult | null {
-    this.resourceKindMap[resource.id] = resource.kind;
-
-    for (const floor of this.floors) {
-      const spot = floor.spots.find(
-        s => !s.occupiedBy && s.size >= resource.kind // מנגנון "<" במקום fitMatrix
-      );
-      if (spot) {
-        spot.occupiedBy = resource.id;
-        return { container: floor.id, unitId: spot.id };
-      }
+release(spotId: string , carId : string): boolean { 
+  delete this.resourceKindMap[carId];
+  for (const floor of this.floors) {
+    const spot = floor.spots.find(s => s.id === spotId && s.occupiedBy === carId);
+    if (spot) {
+      spot.occupiedBy = undefined;
+      return true;
     }
-    return null;
   }
+  return false
+}
 
-  release(resourceId: string): boolean {
-    delete this.resourceKindMap[resourceId];
-    for (const floor of this.floors) {
-      const spot = floor.spots.find(s => s.occupiedBy === resourceId);
-      if (spot) {
-        spot.occupiedBy = undefined;
-        return true;
-      }
-    }
-    return false;
-  }
 
   stats(): Stats {
     const totalBySize: Record<SpotSize, number> = {
@@ -63,7 +59,6 @@ export class Allocator {
     return { totalBySize, freeBySize, usedByKind };
   }
 
-  // מקוצר את isFull / isEmpty
   isFull(): boolean {
     return !this.floors.some(floor => floor.spots.some(s => !s.occupiedBy));
   }

@@ -11,15 +11,15 @@ export enum SpotSize {
   "LARGE" = 3
 }
 
-export interface Resource {
-  id: string;
+export interface Car {
+  CarId: string;
   kind: VehicleKind;
 }
 
 export interface Spot {
   id: string;
   size: SpotSize;
-  occupiedBy?: string; // resourceId
+  occupiedBy?: string; // CarId
 }
 
 export interface Floor {
@@ -28,8 +28,8 @@ export interface Floor {
 }
 
 export interface AllocationResult {
-  container: string;
-  unitId: string;
+  // container: string;
+  spotId: string;
 }
 
 export interface Stats {

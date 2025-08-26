@@ -1,7 +1,7 @@
 ﻿// src/server.ts
 import express from "express";
 import { Allocator,  } from "./allocator";
-import { VehicleKind, Resource, Floor, SpotSize } from "./types/types";
+import { VehicleKind, Car, Floor, SpotSize } from "./types/types";
 import router from "./router";
 
 const app = express();
@@ -29,10 +29,10 @@ const floors = [
 const allocator = new Allocator(floors);
 
 app.post("/allocate", (req, res) => {
-  const { id, kind } = req.body as { id: string; kind: VehicleKind };
-  if (!id || !kind) return res.status(400).json({ error: "Missing id or kind" });
+  const { CarId, kind } = req.body as { CarId: string; kind: VehicleKind };
+  if (!CarId || !kind) return res.status(400).json({ error: "Missing id or kind" });
 
-  const resource: Resource = { id, kind };
+  const resource: Car = { CarId, kind };
   // registerResource(resource);
 
   const result = allocator.allocate(resource);
@@ -41,10 +41,10 @@ app.post("/allocate", (req, res) => {
 });
 
 app.post("/release", (req, res) => {
-  const { id } = req.body as { id: string };
-  if (!id) return res.status(400).json({ error: "Missing id" });
+  const { id ,CarId } = req.body as { id: string ; CarId: string };
+  if (!id || !CarId) return res.status(400).json({ error: "Missing id" });
 
-  const success = allocator.release(id);
+  const success = allocator.release(id ,CarId );
   res.json({ status: success ? "ok" : "not_found" });
 });
 
