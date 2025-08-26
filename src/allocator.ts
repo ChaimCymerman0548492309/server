@@ -1,14 +1,4 @@
-import { VehicleKind, SpotSize, Resource, Floor, Spot, AllocationResult, Stats } from "./types/types";
-
-function fits(resourceKind: VehicleKind, spotSize: SpotSize): boolean {
-  const fitMatrix: Record<VehicleKind, SpotSize[]> = {
-    "MOTORCYCLE": ["MOTORCYCLE", "COMPACT", "LARGE"],
-    "CAR": ["COMPACT", "LARGE"],
-    "VAN": ["LARGE"]
-  };
-  
-  return fitMatrix[resourceKind].includes(spotSize);
-}
+import { VehicleKind, SpotSize, Resource, Floor, AllocationResult, Stats } from "./types/types";
 
 export class Allocator {
   private floors: Floor[];
@@ -20,64 +10,65 @@ export class Allocator {
 
   allocate(resource: Resource): AllocationResult | null {
     this.resourceKindMap[resource.id] = resource.kind;
-    
+
     for (const floor of this.floors) {
-      const availableSpot = floor.spots.find(spot => 
-        !spot.occupiedBy && fits(resource.kind, spot.size)
+      const spot = floor.spots.find(
+        s => !s.occupiedBy && s.size >= resource.kind // מנגנון "<" במקום fitMatrix
       );
-      
-      if (availableSpot) {
-        availableSpot.occupiedBy = resource.id;
-        return { container: floor.id, unitId: availableSpot.id };
+      if (spot) {
+        spot.occupiedBy = resource.id;
+        return { container: floor.id, unitId: spot.id };
       }
     }
-    
     return null;
   }
 
   release(resourceId: string): boolean {
     delete this.resourceKindMap[resourceId];
-    
     for (const floor of this.floors) {
-      const spot = floor.spots.find(spot => spot.occupiedBy === resourceId);
-      if (spot) return !!(spot.occupiedBy = undefined);
+      const spot = floor.spots.find(s => s.occupiedBy === resourceId);
+      if (spot) {
+        spot.occupiedBy = undefined;
+        return true;
+      }
     }
     return false;
   }
 
   stats(): Stats {
-  const totalBySize: Record<SpotSize, number> = { MOTORCYCLE: 0, COMPACT: 0, LARGE: 0 };
-  const freeBySize: Record<SpotSize, number> = { MOTORCYCLE: 0, COMPACT: 0, LARGE: 0 };
-  const usedByKind: Record<VehicleKind, number> = { MOTORCYCLE: 0, CAR: 0, VAN: 0 };
+    const totalBySize: Record<SpotSize, number> = {
+      [SpotSize.MOTORCYCLE]: 0,
+      [SpotSize.COMPACT]: 0,
+      [SpotSize.LARGE]: 0,
+    };
+    const freeBySize: Record<SpotSize, number> = { ...totalBySize };
+    const usedByKind: Record<VehicleKind, number> = {
+      [VehicleKind.MOTORCYCLE]: 0,
+      [VehicleKind.CAR]: 0,
+      [VehicleKind.VAN]: 0,
+    };
 
-  this.floors.forEach(floor => {
-    floor.spots.forEach(spot => {
-      totalBySize[spot.size]++;
-      
-      if (spot.occupiedBy) {
-        const kind = this.resourceKindMap[spot.occupiedBy];
-        if (kind) usedByKind[kind]++;
-      } else {
-        freeBySize[spot.size]++;
-      }
-    });
-  });
+    this.floors.forEach(floor =>
+      floor.spots.forEach(spot => {
+        totalBySize[spot.size]++;
+        if (spot.occupiedBy) {
+          const kind = this.resourceKindMap[spot.occupiedBy];
+          if (kind) usedByKind[kind]++;
+        } else {
+          freeBySize[spot.size]++;
+        }
+      })
+    );
 
-  return { totalBySize, freeBySize, usedByKind };
-}
+    return { totalBySize, freeBySize, usedByKind };
+  }
+
+  // מקוצר את isFull / isEmpty
   isFull(): boolean {
-    return this.floors.every(floor => floor.spots.every(spot => spot.occupiedBy !== undefined));
+    return !this.floors.some(floor => floor.spots.some(s => !s.occupiedBy));
   }
 
   isEmpty(): boolean {
-    return this.floors.every(floor => floor.spots.every(spot => spot.occupiedBy === undefined));
-  }
-
-  private getResourceKindById(resourceId: string): VehicleKind {
-    const kind = this.resourceKindMap[resourceId];
-    if (!kind) throw new Error(`Unknown resourceId: ${resourceId}`);
-    return kind;
+    return !this.floors.some(floor => floor.spots.some(s => s.occupiedBy));
   }
 }
-
-
