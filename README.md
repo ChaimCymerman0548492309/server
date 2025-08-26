@@ -1,104 +1,52 @@
-# 🚗 Resource Allocator (Parking-Lot Preset)
+# Parking-Lot
 
-A small system for allocating parking spots to vehicles using **first-fit** policy.  
-Built with **TypeScript + Express**.
+## The goal is to manage a parking lot efficiently and effectively.
 
----
-
-## 📐 Design & Implementation
-- **Allocator class** manages resources (vehicles) across **Floors → Spots**.  
-- Encapsulation: Floors/Spots are private (not exposed externally).  
-- Deterministic allocation → *first compatible floor wins*.  
-- Strict typing: TypeScript `union types + interfaces`.
-
-### Vehicle & Spot Types
-| Vehicle      | Allowed Spots        |
-|--------------|----------------------|
-| 🏍️ Motorcycle | Motorcycle / Compact / Large |
-| 🚗 Car        | Compact / Large      |
-| 🚐 Van        | Large only           |
-
----
-
+# HLD :
 ## 🖼️ System Diagram
+![This is an alt text.](/diagram.png "This is a sample image.")
+<!-- ###### This is a Heading h6 -->
 
-![System Diagram](Untitled_diagram.png)
+## API's
 
----
+| Req  | Res|
+| ------------- |:-------------:|
+|POST /car    {carID : string , kind : string} | {code : 200 ,positonID : string}     |
+| POST /releaseCar    {carID : string , positonID : string}   | {code : 200 , massge : OK}     |
+|GET /isEmpty      | {code : 200 , massge : boolean }    |
+|GET /isFull      | {code : 200 , massge : boolean   }  |
+|GET /stats      | {code : 200 , massge : {carsSum : number , carsType : { MOTORCYCLE :number , CAR :number , VAN :number }}  }  |
 
-## 🌐 API Endpoints
+## error model
+| Req  | Res|
+| ------------- |:-------------:|
+|POST /car    {carID : null , kind : string} | {code : 400 ,massge : error}     |
+| POST /releaseCar    {carID : null , positonID : string}   | {code : 400 , massge : error}     |
 
-| Method | Endpoint      | Body Example                   | Response                |
-|--------|--------------|--------------------------------|-------------------------|
-| POST   | `/allocate`  | `{ "id": "car1", "kind": "CAR" }` | `location` / `no_capacity` |
-| POST   | `/release`   | `{ "id": "car1" }`             | `ok` / `not_found`      |
-| GET    | `/stats`     | –                              | `{ totalBySize, freeBySize, usedByKind }` |
-| GET    | `/isFull`    | –                              | `true` / `false`        |
-| GET    | `/isEmpty`   | –                              | `true` / `false`        |
+## schema
+| floor  | SpotID |SpotSize | carID| DateOfStratParking | TimeOfStratParking |
+| ------------- |:-------------:|:-------------:| :-------------:|:-------------:| :-------------:|
+| number|   number  | number| number |Date | Date
 
----
 
-## 📂 Project Structure
-```text
-.
-├── src
-│   ├── allocator.ts     # Core Allocator logic
-│   ├── types.ts         # Enums & interfaces
-│   ├── server.ts        # Express server + routes
-│   └── index.ts         # Entry point
-├── package.json
-├── tsconfig.json
-└── README.md
-```
 
----
+## Emphasis
 
-## ▶️ How to Run
+**indexes:**  
+* SpotID 
+* carID
 
-1. Install dependencies:
+**For security purposes, all vehicle details are encrypted,**  
 
-   ```bash
-   npm install
-   ```
-2. Build:
+__And every call from the client should have a JWT cookie.__
 
-   ```bash
-   npm run build
-   ```
-3. Start:
+__There is a limit on the number of API call's from each IP address to a maximum of 10 every 60 seconds.__
 
-   ```bash
-   npm start
-   ```
-4. Test with curl / Postman (examples below).
+__The reason I used MongoDB is mainly because of the flexibility and ease of planning that suits me because of the project and the limited time I have to plan.__
 
----
-
-## 🧪 Example curl Tests
-
-```bash
-# Allocate a Car
-curl -X POST http://localhost:3000/allocate \
-  -H "Content-Type: application/json" \
-  -d '{"id":"car1","kind":"CAR"}'
-
-# Release a Car
-curl -X POST http://localhost:3000/release \
-  -H "Content-Type: application/json" \
-  -d '{"id":"car1"}'
-
-# Get Stats
-curl http://localhost:3000/stats
-
-# Check if Full
-curl http://localhost:3000/isFull
-```
-
----
-
-## 🎯 Design Highlights
-
-* **Encapsulation** → Floors/Spots hidden internally.
-* **Type-safety** → strict TypeScript + union types.
-* **Deterministic allocation** → first-fit policy.
-* **Resource registry** → keeps `resourceId → kind`.
+## Tests
+|   | | TestType|
+| ------------- |:-------------:|:-------------:|
+|POST /car    {carID : string , kind : string} | {code : 200 ,positonID : string}     | success
+| POST /releaseCar    {carID : string , positonID : string}   | {code : 200 , massge : OK}     | success 
+| POST /releaseCar    {carID : null , positonID : string}   | {code : 400 , massge : error}     | error

@@ -1,4 +1,4 @@
-import { Allocator, registerResource } from "../src/allocator";
+import { Allocator } from "../src/allocator";
 import { VehicleKind, Floor, Resource } from "../src/types/types";
 
 let allocator: Allocator;
@@ -28,7 +28,7 @@ beforeEach(() => {
 // --- Test 1: Compatibility: allocate Car to COMPACT/LARGE ---
 it("allocates a Car to COMPACT or LARGE spot (first-fit)", () => {
   const car: Resource = { id: "car1", kind: "CAR" };
-  registerResource(car);
+  // registerResource(car);
 
   const result = allocator.allocate(car);
   expect(result).not.toBeNull();
@@ -40,8 +40,8 @@ it("does not allocate Van when only smaller spots remain", () => {
   const van1: Resource = { id: "van1", kind: "VAN" };
   const van2: Resource = { id: "van2", kind: "VAN" };
 
-  registerResource(van1);
-  registerResource(van2);
+  // registerResource(van1);
+  // registerResource(van2);
 
   // Allocate first Van to first LARGE spot
   const r1 = allocator.allocate(van1);
@@ -55,7 +55,7 @@ it("does not allocate Van when only smaller spots remain", () => {
 
   // Allocate third Van → no LARGE spots left
   const van3: Resource = { id: "van3", kind: "VAN" };
-  registerResource(van3);
+  // registerResource(van3);
   const r3 = allocator.allocate(van3);
   expect(r3).toBeNull();
 });
@@ -63,7 +63,7 @@ it("does not allocate Van when only smaller spots remain", () => {
 // --- Test 3: Counters after allocate → release ---
 it("updates stats correctly after allocate and release", () => {
   const car: Resource = { id: "car1", kind: "CAR" };
-  registerResource(car);
+  // registerResource(car);
 
   const alloc = allocator.allocate(car);
   expect(alloc).not.toBeNull();
