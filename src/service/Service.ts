@@ -1,10 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
-import { Repository, Item } from "./types";
+import { Item, Repository } from "../types/types.js";
 
 const DATA_FILE = path.join(__dirname, "data.json");
 
-export class JsonRepository implements Repository<Item> {
+export class Service implements Repository<Item> {
   private async load(): Promise<Item[]> {
     try {
       const raw = await fs.readFile(DATA_FILE, "utf-8");

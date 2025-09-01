@@ -1,41 +1,15 @@
-// export enum VehicleKind = {"MOTORCYCLE" | "CAR" | "VAN";}
-export enum VehicleKind {
-  "MOTORCYCLE" = 1,
-  "CAR" = 2,
-  "VAN" = 3,
-}
-// export type SpotSize = "MOTORCYCLE" | "COMPACT" | "LARGE";
-export enum SpotSize {
-  "MOTORCYCLE" = 1, 
-  "COMPACT" = 2,
-  "LARGE" = 3
-}
-
-export interface Car {
-  CarId: string;
-  kind: VehicleKind;
-}
-
-export interface Spot {
+export interface Item {
   id: string;
-  size: SpotSize;
-  occupiedBy?: string; // CarId
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface Floor {
-  id: string;
-  spots: Spot[];
+export interface Repository<T> {
+  getAll(): Promise<T[]>;
+  getById(id: string): Promise<T | null>;
+  create(data: Partial<T>): Promise<T>;
+  update(id: string, data: Partial<T>): Promise<T | null>;
+  delete(id: string): Promise<boolean>;
 }
-
-export interface AllocationResult {
-  // container: string;
-  spotId: string;
-}
-
-export interface Stats {
-  totalBySize: Record<SpotSize, number>;
-  freeBySize: Record<SpotSize, number>;
-  usedByKind: Record<VehicleKind, number>;
-}
-
-
